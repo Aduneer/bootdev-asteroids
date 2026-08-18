@@ -1,11 +1,12 @@
 import pygame
 
+
 # Base class for game objects
 class CircleShape(pygame.sprite.Sprite):
     containers: tuple[pygame.sprite.Group, ...]
 
     def __init__(self, x: float, y: float, radius: float) -> None:
-        # we will be using this later
+        # add the sprite to every group declared in `containers`
         if hasattr(self, "containers"):
             super().__init__(*self.containers)
         else:
@@ -23,6 +24,6 @@ class CircleShape(pygame.sprite.Sprite):
         # must override
         pass
 
-    def collides_with(self, other: 'CircleShape') -> bool:
+    def collides_with(self, other: "CircleShape") -> bool:
         distance = self.position.distance_to(other.position)
         return distance <= (self.radius + other.radius)

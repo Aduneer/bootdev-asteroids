@@ -1,7 +1,8 @@
-import pygame
 import random
+
+import pygame
 from circleshape import CircleShape
-from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS
+from constants import ASTEROID_MIN_RADIUS, ASTEROID_SPLIT_SPEEDUP, LINE_WIDTH
 from logger import log_event
 
 
@@ -9,8 +10,7 @@ class Asteroid(CircleShape):
     def __init__(self, x: float, y: float, radius: float) -> None:
         super().__init__(x, y, radius)
 
-
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         pygame.draw.circle(
             screen,
             "white",
@@ -19,22 +19,22 @@ class Asteroid(CircleShape):
             LINE_WIDTH,
         )
 
-    def split(self):
+    def update(self, dt: float) -> None:
+        self.position += self.velocity * dt
+
+    def split(self) -> None:
         self.kill()
+
+        # the smallest asteroids are destroyed outright
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
 
         log_event("asteroid_split")
+
+        # send the two halves off at an angle either side of the original course
         angle = random.uniform(20, 50)
-        first_velocity = self.velocity.rotate(angle)
-        second_velocity = self.velocity.rotate(-angle)
         new_radius = self.radius - ASTEROID_MIN_RADIUS
 
-        first_asteroid = Asteroid(self.position.x, self.position.y, new_radius)
-        first_asteroid.velocity = first_velocity * 1.2
-
-        second_asteroid = Asteroid(self.position.x, self.position.y, new_radius)
-        second_asteroid.velocity = second_velocity * 1.2
-
-    def update(self, dt: float) -> None:
-        self.position += self.velocity * dt
+        for velocity in (self.velocity.rotate(angle), self.velocity.rotate(-angle)):
+            asteroid = Asteroid(self.position.x, self.position.y, new_radius)
+            asteroid.velocity = velocity * ASTEROID_SPLIT_SPEEDUP
