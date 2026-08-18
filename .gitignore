@@ -11,3 +11,6 @@ wheels/
 
 # Logger
 game_state.jsonl
+
+# IDE
+.idea
